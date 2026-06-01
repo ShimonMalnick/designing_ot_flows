@@ -1,0 +1,1939 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="auto">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Optimal Transport Flow Matching by Design — project page.">
+<title>OT by Design</title>
+<style>
+/* ── Fonts ── */
+@font-face { font-family:'Source Serif 4'; font-style:normal; font-weight:300 700; font-display:swap; src:url(assets/fonts/source-serif-4-latin.woff2) format('woff2'); }
+@font-face { font-family:'Source Sans 3'; font-style:normal; font-weight:300 600; font-display:swap; src:url(assets/fonts/source-sans-3-latin.woff2) format('woff2'); }
+@font-face { font-family:'JetBrains Mono'; font-style:normal; font-weight:400 500; font-display:swap; src:url(assets/fonts/jetbrains-mono-latin.woff2) format('woff2'); }
+@font-face { font-family:'STIX Two Text'; font-style:normal; font-weight:400 700; font-display:swap; src:url(assets/fonts/stix-two-text-latin.woff2) format('woff2'); }
+
+/* ══════════════════════════════════
+   Design Tokens — Light Mode
+══════════════════════════════════ */
+:root {
+  /* Backgrounds */
+  --bg:         #FAFAF8;
+  --bg-alt:     #EEF4FF;
+  --bg-card:    #FFFFFF;
+  --bg-hero:    #FFFFFF;
+  /* Text */
+  --fg:         #111827;
+  --fg-muted:   #4B5563;
+  --fg-light:   #9CA3AF;
+  /* Accent */
+  --accent:     #2563EB;
+  --accent-2:   #3B82F6;
+  --accent-bg:  #DBEAFE;
+  --accent-border: #BFDBFE;
+  /* Utility */
+  --border:     #E5E7EB;
+  --green:      #16A34A;
+  --red:        #DC2626;
+  --shadow:     0 1px 4px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.06);
+  /* Fonts */
+  --serif: 'Source Serif 4', Georgia, serif;
+  --sans:  'Source Sans 3', -apple-system, sans-serif;
+  --mono:  'JetBrains Mono', monospace;
+  --math:  'STIX Two Text', 'Source Serif 4', serif;
+  /* Layout */
+  --col: 980px;
+
+  /* ── Font sizes ── */
+  --fs-body:        20px;
+  --fs-title:       3.8rem;
+  --fs-section-h:   2.3rem;
+  --fs-authors:     1.4rem;
+  --fs-affiliations:1.12rem;
+  --fs-btn:         1.0rem;
+  --fs-abstract:    1.2rem;
+  --fs-section-body:1.15rem;
+  --fs-caption:     0.95rem;
+  --fs-stat-num:    3.6rem;
+  --fs-stat-label:  0.85rem;
+  --fs-stat-detail: 0.95rem;
+  --fs-alpha-val:   1.6rem;
+  --fs-alpha-label: 1.15rem;
+  --fs-tab:         1.0rem;
+  --fs-gallery-hdr: 0.88rem;
+  --fs-mono:        0.88rem;
+  --fs-footer:      0.95rem;
+  --fs-pipeline-label: 0.92rem;
+  --fs-pipeline-op: 0.92rem;
+}
+
+/* ══════════════════════════════════
+   Dark Mode Tokens
+══════════════════════════════════ */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:         #0D1117;
+    --bg-alt:     #121A2E;
+    --bg-card:    #161B22;
+    --bg-hero:    #0D1117;
+    --fg:         #E6EDF3;
+    --fg-muted:   #8B949E;
+    --fg-light:   #6E7681;
+    --accent:     #58A6FF;
+    --accent-2:   #79B8FF;
+    --accent-bg:  #1C3A5E;
+    --accent-border: #2D4F7C;
+    --border:     #21262D;
+    --green:      #3FB950;
+    --red:        #F85149;
+    --shadow:     0 1px 4px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.25);
+  }
+}
+[data-theme="dark"] {
+  --bg:         #0D1117;
+  --bg-alt:     #121A2E;
+  --bg-card:    #161B22;
+  --bg-hero:    #0D1117;
+  --fg:         #E6EDF3;
+  --fg-muted:   #8B949E;
+  --fg-light:   #6E7681;
+  --accent:     #58A6FF;
+  --accent-2:   #79B8FF;
+  --accent-bg:  #1C3A5E;
+  --accent-border: #2D4F7C;
+  --border:     #21262D;
+  --green:      #3FB950;
+  --red:        #F85149;
+  --shadow:     0 1px 4px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.25);
+}
+[data-theme="light"] {
+  --bg: #FAFAF8; --bg-alt: #EEF4FF; --bg-card: #FFFFFF; --bg-hero: #FFFFFF;
+  --fg: #111827; --fg-muted: #4B5563; --fg-light: #9CA3AF;
+  --accent: #2563EB; --accent-2: #3B82F6; --accent-bg: #DBEAFE; --accent-border: #BFDBFE;
+  --border: #E5E7EB; --green: #16A34A; --red: #DC2626;
+  --shadow: 0 1px 4px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.06);
+}
+
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--sans);
+  font-size: var(--fs-body);
+  background: var(--bg);
+  color: var(--fg);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  transition: background 0.25s, color 0.25s;
+}
+em { font-family: var(--math); font-style: italic; }
+
+/* ── Theme toggle ── */
+.theme-toggle {
+  position: fixed; top: 1rem; right: 1rem; z-index: 200;
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--bg-card); border: 2px solid var(--accent-border);
+  color: var(--fg); font-size: 1.1rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow), 0 0 0 3px var(--accent-bg);
+  transition: background 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.theme-toggle:hover { color: var(--accent); border-color: var(--accent); }
+[data-theme="dark"] .theme-toggle {
+  background: #1C3A5E;
+  border-color: #58A6FF;
+  color: #E6EDF3;
+  box-shadow: var(--shadow), 0 0 0 3px rgba(88,166,255,0.18);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .theme-toggle {
+    background: #1C3A5E;
+    border-color: #58A6FF;
+    color: #E6EDF3;
+    box-shadow: var(--shadow), 0 0 0 3px rgba(88,166,255,0.18);
+  }
+}
+.theme-toggle:focus-visible,
+.btn:focus-visible,
+.tab-btn:focus-visible,
+.nfe-badge:focus-visible,
+.play-btn:focus-visible,
+.bibtex-copy:focus-visible,
+.lightbox-close:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* ── Header / Title ── */
+.header {
+  text-align: center;
+  padding: 5rem 2rem 2.5rem;
+  max-width: var(--col);
+  margin: 0 auto;
+  background: var(--bg-hero);
+}
+.paper-title {
+  font: 700 var(--fs-title)/1.1 var(--serif);
+  letter-spacing: -0.02em;
+  color: var(--fg);
+  margin-bottom: 1.8rem;
+}
+.authors {
+  font-size: var(--fs-authors);
+  font-family: var(--sans);
+  font-weight: 500;
+  line-height: 2;
+  color: var(--fg-muted);
+  margin-bottom: 0.3rem;
+}
+.authors sup { font-size: 0.62em; vertical-align: super; }
+.authors a { color: inherit; text-decoration: none; border-bottom: 1px solid var(--accent-border); transition: color 0.15s, border-color 0.15s; }
+.authors a:hover { color: var(--accent); border-color: var(--accent); }
+.affiliations {
+  font-size: var(--fs-affiliations);
+  font-family: var(--sans);
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--fg-light);
+  margin-bottom: 1.2rem;
+}
+.affiliations sup { font-size: 0.65em; vertical-align: super; }
+.uni-logos {
+  margin: 0 auto 1.8rem;
+  max-width: 460px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.0rem;
+  flex-wrap: wrap;
+}
+.uni-logos img { height: auto; opacity: 0.88; mix-blend-mode: multiply; }
+.uni-logo-universities {
+  width: min(100%, 340px);
+  flex: 1 1 260px;
+  max-width: 340px;
+}
+.uni-logo-lab {
+  width: 140px;
+  flex: 0 0 auto;
+  margin-left: -2.25rem;
+}
+/* Dark mode: invert+hue-rotate so logos appear light without color shifts */
+[data-theme="dark"] .uni-logos img { filter: invert(1) hue-rotate(180deg); mix-blend-mode: screen; opacity: 0.90; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .uni-logos img { filter: invert(1) hue-rotate(180deg); mix-blend-mode: screen; opacity: 0.90; }
+}
+@media (max-width: 520px) {
+  .uni-logos {
+    max-width: 360px;
+    gap: 0.0rem;
+  }
+  .uni-logo-universities {
+    flex-basis: 220px;
+    max-width: 280px;
+  }
+  .uni-logo-lab {
+    width: 72px;
+    margin-left: -1.25rem;
+  }
+}
+.links {
+  display: flex; gap: 0.7rem;
+  justify-content: center; flex-wrap: wrap;
+}
+.btn {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.55em 1.3em;
+  font: 500 var(--fs-btn)/1 var(--sans);
+  color: var(--fg);
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: 100px;
+  text-decoration: none;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+}
+.btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 0 2px 8px rgba(37,99,235,0.25); }
+
+/* ── Divider ── */
+hr { border: none; border-top: 1px solid var(--border); margin: 0; }
+
+/* ── Section containers ── */
+.container { max-width: var(--col); margin: 0 auto; padding: 0 2rem; }
+.section { padding: 5rem 0; }
+.section-lazy {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 900px;
+}
+.section-alt { background: var(--bg-alt); }
+.section-title {
+  font: 700 var(--fs-section-h)/1.2 var(--serif);
+  text-align: center;
+  margin-bottom: 1rem;
+  color: var(--fg);
+}
+.section-body {
+  font: 400 var(--fs-section-body)/1.75 var(--sans);
+  color: var(--fg-muted);
+  max-width: 720px;
+  margin: 0 auto 2.5rem;
+  text-align: center;
+}
+
+/* ── Teaser canvas ── */
+.teaser-wrap {
+  padding: 3rem 2rem 0.5rem;
+  max-width: var(--col);
+  margin: 0 auto;
+}
+#teaser-canvas {
+  width: 100%; max-width: 900px; height: auto;
+  display: block; margin: 0 auto;
+}
+.teaser-caption {
+  font: 400 var(--fs-caption)/1.6 var(--sans);
+  color: var(--fg-light);
+  text-align: center;
+  margin-top: 1rem;
+  max-width: 680px;
+  margin-left: auto; margin-right: auto;
+}
+.panel-labels {
+  display: flex; justify-content: center; gap: 0;
+  max-width: 900px; margin: 0.5rem auto 0;
+}
+.panel-label {
+  flex: 1; text-align: center;
+  font: 600 var(--fs-caption)/1 var(--sans);
+  color: var(--fg-muted); padding: 0.4rem 0;
+}
+.panel-label em { font-family: var(--sans); font-style: normal; }
+.panel-label.panel-b { color: var(--accent); }
+
+/* ── Abstract ── */
+.abstract-text {
+  font: 400 var(--fs-abstract)/1.85 var(--math);
+  color: var(--fg);
+  max-width: 760px;
+  margin: 0 auto;
+  text-align: justify;
+  hyphens: auto;
+}
+
+/* ── CIFAR Illustration ── */
+.cifar-illustration {
+  margin-top: 2rem;
+}
+.cifar-nfe-tabs { margin-bottom: 1.5rem; }
+
+/* ── Alpha widget ── */
+.alpha-widget {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 2rem;
+  margin-top: 2rem;
+  box-shadow: var(--shadow);
+}
+.alpha-controls {
+  display: flex; align-items: center; gap: 1rem;
+  margin-bottom: 1.4rem; flex-wrap: wrap;
+}
+.alpha-controls label { font: 600 var(--fs-alpha-label)/1 var(--math); color: var(--fg-muted); }
+.alpha-controls input[type=range] {
+  flex: 1; min-width: 180px;
+  -webkit-appearance: none; appearance: none;
+  height: 6px; background: transparent; cursor: pointer;
+}
+.alpha-controls input[type=range]::-webkit-slider-runnable-track {
+  height: 6px; border-radius: 3px;
+  background: linear-gradient(to right, var(--green) 0%, var(--green) 50%, #f59e0b 65%, var(--red) 80%, var(--red) 100%);
+}
+.alpha-controls input[type=range]::-moz-range-track {
+  height: 6px; border-radius: 3px; border: none;
+  background: linear-gradient(to right, var(--green) 0%, var(--green) 50%, #f59e0b 65%, var(--red) 80%, var(--red) 100%);
+}
+.alpha-controls input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--accent); border: 2.5px solid var(--bg-card);
+  box-shadow: 0 1px 5px rgba(0,0,0,0.22); margin-top: -8px;
+  transition: transform 0.15s;
+}
+.alpha-controls input[type=range]::-moz-range-thumb {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--accent); border: 2.5px solid var(--bg-card);
+  box-shadow: 0 1px 5px rgba(0,0,0,0.22);
+}
+.alpha-controls input[type=range]:hover::-webkit-slider-thumb { transform: scale(1.15); }
+.alpha-val { font: 600 var(--fs-alpha-val)/1 var(--mono); color: var(--accent); min-width: 3em; text-align: center; }
+.alpha-body { display: grid; grid-template-columns: 1fr 240px; gap: 1.5rem; }
+.alpha-images { display: grid; grid-template-columns: repeat(auto-fill, minmax(82px, 1fr)); gap: 5px; }
+.alpha-images .img-cell {
+  position: relative; background: var(--border);
+  border-radius: 6px; overflow: hidden; aspect-ratio: 1; cursor: zoom-in;
+}
+.alpha-images .img-cell img { width: 100%; height: 100%; object-fit: cover; display: block; }
+#alpha-pixel .alpha-images .img-cell img { image-rendering: pixelated; }
+.alpha-images .img-cell .seed-label {
+  position: absolute; bottom: 2px; right: 3px;
+  font: 500 0.56rem/1 var(--mono);
+  color: rgba(255,255,255,0.85); text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+}
+.ot-stats { display: flex; flex-direction: column; gap: 0.8rem; justify-content: center; }
+.ot-stat-block {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 10px; padding: 1rem 1.2rem; text-align: center;
+}
+.ot-stat-block .domain { font: 500 0.78rem/1 var(--sans); color: var(--fg-light); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.3rem; }
+.ot-stat-block .pct { font: 700 2.2rem/1 var(--math); transition: color 0.3s; }
+.ot-stat-block .detail { font: 400 0.82rem/1.4 var(--sans); color: var(--fg-light); margin-top: 0.2rem; }
+.alpha-ref-row { margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px dashed var(--border); }
+.alpha-ref-label { font: 500 0.85rem/1 var(--sans); color: var(--fg-light); margin-bottom: 0.4rem; }
+.alpha-ref-label span { font: 500 0.78rem/1 var(--mono); color: var(--fg-light); background: var(--border); border-radius: 3px; padding: 0.1em 0.4em; margin-left: 0.3em; }
+.play-btn {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 2px solid var(--accent); background: transparent; color: var(--accent);
+  font-size: 0.78rem; cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+.play-btn:hover { background: var(--accent); color: #fff; }
+
+/* ── Tabs ── */
+.tab-row { display: flex; border-bottom: 1.5px solid var(--border); margin-bottom: 1.4rem; }
+.tab-btn {
+  background: none; border: none;
+  padding: 0.55rem 1.2rem;
+  font: 500 var(--fs-tab)/1 var(--sans);
+  color: var(--fg-light); cursor: pointer;
+  border-bottom: 2.5px solid transparent; margin-bottom: -1.5px;
+  transition: color 0.15s, border-color 0.15s;
+}
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── Stat cards ── */
+.stat-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; margin-top: 2.5rem; }
+.stat-card {
+  border: 1.5px solid var(--border);
+  border-radius: 14px; padding: 2rem 1.4rem; text-align: center;
+  position: relative; overflow: hidden;
+  background: var(--bg-card); box-shadow: var(--shadow);
+}
+.stat-card::after {
+  content: ''; position: absolute; top: 0; left: 0; right: 0;
+  height: 4px; background: var(--accent); border-radius: 14px 14px 0 0;
+}
+.stat-num { font: 700 var(--fs-stat-num)/1 var(--math); color: var(--accent); display: block; margin-bottom: 0.5rem; }
+.stat-label { font: 600 var(--fs-stat-label)/1 var(--sans); text-transform: uppercase; letter-spacing: 0.07em; color: var(--fg-light); margin-bottom: 0.4rem; }
+.stat-detail { font: 400 var(--fs-stat-detail)/1.4 var(--sans); color: var(--fg-muted); }
+
+/* ── Pipeline ── */
+.pipeline-section { display: flex; flex-direction: column; gap: 3rem; margin-top: 2rem; }
+.pipeline-part { }
+.pipeline-part-label {
+  font: 700 1.05rem/1 var(--sans);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fg-light);
+  margin-bottom: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+.pipeline-part-label span {
+  display: inline-block;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--accent);
+}
+.pipeline-row {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 0;
+  justify-content: center;
+  overflow-x: visible;
+  row-gap: 0.85rem;
+  padding-bottom: 0.5rem;
+}
+.pl-step {
+  display: flex; flex-direction: column; align-items: center;
+  opacity: 0; transform: translateY(14px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  flex-shrink: 0;
+}
+.pl-step.pl-visible { opacity: 1; transform: translateY(0); }
+.pl-img-box {
+  width: 96px; height: 96px; border-radius: 10px;
+  overflow: hidden; position: relative;
+  border: 1.5px solid var(--border);
+  box-shadow: var(--shadow);
+}
+.pl-img-box img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pl-sym-box {
+  width: 110px; height: 110px; border-radius: 10px;
+  background: var(--accent-bg); border: 1.5px solid var(--accent-border);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font: 600 1.15rem/1.3 var(--math); color: var(--accent);
+  gap: 0.2rem;
+}
+.pl-text-node {
+  width: 96px; height: 96px;
+  display: flex; align-items: center; justify-content: center;
+  font: 600 1.25rem/1 var(--math); color: var(--fg-muted);
+  white-space: nowrap;
+}
+.pl-label {
+  font: 500 var(--fs-pipeline-label)/1.3 var(--math);
+  color: var(--fg);
+  margin-top: 0.5rem;
+  text-align: center;
+  white-space: nowrap;
+  max-width: 110px;
+}
+.math { font-family: var(--math); font-style: italic; white-space: nowrap; }
+.math sub { font-size: 0.7em; vertical-align: -0.25em; }
+.math sup { font-size: 0.65em; line-height: 0; margin-left: 0.03em; vertical-align: 0.55em; }
+.math .cal { font-style: normal; }
+.math .hat,
+.math .tilde {
+  display: inline-block;
+  position: relative;
+}
+.math .hat::before,
+.math .tilde::before {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.7em;
+  line-height: 1;
+}
+.math .hat::before { content: '^'; top: -0.48em; }
+.math .tilde::before { content: '~'; top: -0.42em; }
+.pl-connector {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 0 0.3rem;
+  padding-bottom: 1.8rem; /* align with center of image box */
+  opacity: 0; transition: opacity 0.35s ease;
+  flex-shrink: 0;
+}
+.pl-connector.pl-visible { opacity: 1; }
+.pl-op {
+  font: 600 var(--fs-pipeline-op)/1 var(--math);
+  color: var(--accent); margin-bottom: 0.25rem; white-space: nowrap;
+  background: var(--bg-card); border: 1.5px solid var(--border);
+  border-radius: 6px; padding: 0.22em 0.55em;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 2em;
+}
+.pl-model-connector { padding: 0 0.55rem 1.15rem; }
+.pl-model-op {
+  width: 155px;
+  min-height: 84px;
+  padding: 0.65rem 0.75rem;
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-size: 1.2rem;
+  line-height: 1.25;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.pl-model-note {
+  font: 500 0.75rem/1.25 var(--sans);
+  color: var(--fg);
+}
+.pl-subnote {
+  font: 500 0.76rem/1.25 var(--sans);
+  color: var(--fg-muted);
+  margin-top: 0.25rem;
+  text-align: center;
+}
+.pl-prior-op { color: var(--accent); }
+.pl-arrow { color: var(--fg-light); font-size: 1.4rem; line-height: 1; }
+
+/* ── Gallery grids ── */
+.gallery-grid { display: grid; gap: 2px; background: var(--border); border-radius: 10px; overflow: hidden; }
+.gallery-grid .cell { background: var(--bg-card); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+.gallery-grid .cell img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.2s; }
+.gallery-grid .cell:hover img { transform: scale(1.06); }
+.gallery-grid .cell.placeholder { background: var(--bg-alt); color: var(--fg-light); font: 400 0.6rem/1.2 var(--mono); text-align: center; padding: 0.3rem; }
+.gallery-grid .cell.hdr { background: var(--accent-bg); font: 600 var(--fs-gallery-hdr)/1.2 var(--sans); color: var(--accent); padding: 0.5rem 0.2rem; text-align: center; }
+.gallery-grid .cell.row-lbl { background: var(--bg-alt); font: 600 var(--fs-gallery-hdr)/1.2 var(--sans); color: var(--fg-muted); padding: 0.5rem; text-align: center; }
+.gallery-grid .cell.row-lbl.ours { color: var(--accent); font-weight: 700; }
+.gallery-grid.cifar .cell img { image-rendering: pixelated; }
+.fig-caption { font: 400 var(--fs-caption)/1.5 var(--sans); color: var(--fg-light); margin-top: 0.7rem; }
+[data-theme="dark"] .fig-caption,
+[data-theme="dark"] .comp-caption,
+[data-theme="dark"] .teaser-caption,
+[data-theme="dark"] .nfe-gif-label,
+[data-theme="dark"] .pipeline-part-label,
+[data-theme="dark"] .pl-arrow { color: var(--fg-muted); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .fig-caption,
+  :root:not([data-theme="light"]) .comp-caption,
+  :root:not([data-theme="light"]) .teaser-caption,
+  :root:not([data-theme="light"]) .nfe-gif-label,
+  :root:not([data-theme="light"]) .pipeline-part-label,
+  :root:not([data-theme="light"]) .pl-arrow { color: var(--fg-muted); }
+}
+
+/* ── Shimmer ── */
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+.shimmer { background: linear-gradient(90deg, var(--border) 25%, var(--bg-alt) 50%, var(--border) 75%) !important; background-size: 200% 100% !important; animation: shimmer 1.4s infinite; }
+
+/* ── Lightbox ── */
+.lightbox-overlay { display: none; position: fixed; inset: 0; z-index: 1000; align-items: center; justify-content: center; }
+.lightbox-overlay.open { display: flex; }
+.lightbox-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); cursor: zoom-out; }
+.lightbox-content { position: relative; z-index: 1; animation: lb-in 0.18s ease-out; }
+@keyframes lb-in { from { opacity:0; transform:scale(0.93); } to { opacity:1; transform:scale(1); } }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+.lb-row { display: flex; gap: 1rem; align-items: flex-end; }
+.lb-item { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+.lb-item img { max-height: 70vh; width: auto; box-shadow: 0 4px 24px rgba(0,0,0,0.5); border-radius: 4px; }
+.lb-item.lb-active img { outline: 2.5px solid var(--accent); outline-offset: 3px; }
+.lb-label { font: 600 0.85rem/1 var(--sans); color: rgba(255,255,255,0.8); padding: 0.3em 0.7em; border-radius: 4px; background: rgba(255,255,255,0.1); }
+.lb-item.lb-active .lb-label { background: var(--accent); color: #fff; }
+.lightbox-close { position: absolute; top: -14px; right: -14px; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); color: #fff; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
+.lightbox-close:hover { background: rgba(255,255,255,0.3); }
+
+/* ── BibTeX ── */
+.bibtex-wrap { position: relative; margin-top: 1.5rem; }
+.bibtex-block { background: #1e1e2e; color: #a6e3a1; border-radius: 12px; padding: 1.5rem 1.8rem; font: 400 var(--fs-mono)/1.7 var(--mono); white-space: pre; overflow-x: auto; text-align: left; }
+.bibtex-copy { position: absolute; top: 0.7rem; right: 0.7rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: rgba(255,255,255,0.65); font: 500 0.78rem/1 var(--sans); padding: 0.35em 0.8em; border-radius: 5px; cursor: pointer; transition: background 0.15s; }
+.bibtex-copy:hover { background: rgba(255,255,255,0.18); }
+.bibtex-copy.copied { color: #a6e3a1; }
+
+/* ── Footer ── */
+.footer { text-align: center; padding: 3rem 1.5rem; font: 400 var(--fs-footer)/1.6 var(--sans); color: var(--fg-light); border-top: 1px solid var(--border); }
+
+/* ── NFE GIF preview row ── */
+.nfe-gif-row {
+  display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+.nfe-gif-item { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; }
+.nfe-gif-item img {
+  width: 100%; max-width: 340px; height: auto;
+  border-radius: 8px; border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  image-rendering: pixelated;
+}
+.nfe-gif-label { font: 500 0.82rem/1 var(--sans); color: var(--fg-light); }
+
+/* ── NFE comparison controls ── */
+.nfe-anim-wrap { margin-top: 0; }
+.nfe-header-bar {
+  display: flex; align-items: center; justify-content: flex-start;
+  flex-wrap: wrap; gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+.nfe-badge-row { display: flex; gap: 0.4rem; }
+.nfe-badge {
+  padding: 0.45em 1.2em;
+  font: 600 1.05rem/1 var(--sans);
+  border: 2px solid var(--border);
+  border-radius: 100px;
+  background: var(--bg-card);
+  color: var(--fg-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.nfe-badge.active {
+  background: var(--accent); border-color: var(--accent); color: #fff;
+  box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+}
+.nfe-badge:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
+
+/* ── Tiny pipeline image (low-res step) ── */
+.pl-img-box-tiny {
+  width: 40px; height: 40px; border-radius: 6px;
+  overflow: hidden; position: relative;
+  border: 1.5px solid var(--border);
+  box-shadow: var(--shadow);
+  image-rendering: pixelated;
+}
+.pl-img-box-tiny img { width: 100%; height: 100%; object-fit: cover; display: block; image-rendering: pixelated; }
+.pl-step-tiny { align-self: center; }
+.pl-size-label {
+  font: 500 0.72rem/1 var(--mono); color: var(--fg-light);
+  margin-top: 0.3rem; text-align: center;
+}
+.nfe-anim-grid {
+  overflow-x: auto;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--border);
+}
+.nfe-grid-inner {
+  display: grid; gap: 2px;
+  min-width: max-content;
+}
+.nfe-cell {
+  background: var(--bg-card);
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+}
+.nfe-cell.nfe-hdr {
+  background: var(--accent-bg);
+  font: 600 0.82rem/1.2 var(--sans); color: var(--accent);
+  padding: 0.45rem 0.2rem; text-align: center;
+}
+.nfe-cell.nfe-lbl {
+  background: var(--bg-alt);
+  font: 700 0.85rem/1.2 var(--sans); color: var(--fg-muted);
+  padding: 0.4rem 0.3rem; text-align: center; writing-mode: vertical-rl;
+  white-space: nowrap;
+}
+.nfe-cell.nfe-ours { color: var(--accent); }
+.nfe-img {
+  display: block; width: 100%; height: 100%; object-fit: cover;
+  image-rendering: pixelated;
+  transition: opacity 0.3s ease;
+}
+
+/* ── Animated comparison grid ── */
+.comp-grid-wrap { margin-bottom: 3rem; }
+.comp-grid-nfe-bar {
+  display: flex; align-items: center; justify-content: center;
+  gap: 1rem; margin-bottom: 1rem;
+}
+.comp-grid-nfe-label {
+  font: 700 1.1rem/1 var(--sans); color: var(--fg-muted);
+}
+.comp-nfe-badge {
+  display: inline-block; padding: 0.35em 1.1em;
+  font: 700 1.1rem/1 var(--sans);
+  border-radius: 100px;
+  background: var(--accent); color: #fff;
+  box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+  transition: background 0.4s;
+  min-width: 90px; text-align: center;
+}
+.comp-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+  background: var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  max-width: 640px;
+  margin: 0 auto;
+}
+.comp-cell {
+  background: var(--bg-card);
+  position: relative; overflow: hidden;
+  aspect-ratio: 1;
+}
+.comp-cell img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transition: opacity 0.5s ease;
+}
+.comp-cell-hdr {
+  background: var(--accent-bg);
+  display: flex; align-items: center; justify-content: center;
+  padding: 0.5rem 0.2rem;
+  font: 700 0.9rem/1.2 var(--sans); color: var(--accent);
+  text-align: center;
+}
+.comp-cell-hdr.ours-hdr { color: var(--accent); font-size: 1.0rem; }
+.comp-cell-lbl {
+  background: var(--bg-alt);
+  display: flex; align-items: center; justify-content: center;
+  font: 700 0.88rem/1 var(--mono); color: var(--fg-muted);
+  text-align: center;
+}
+.comp-caption {
+  font: 400 var(--fs-caption)/1.5 var(--sans); color: var(--fg-light);
+  text-align: center; margin-top: 0.7rem;
+}
+.comp-grid.cifar .comp-cell img { image-rendering: pixelated; }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  :root { --fs-title: 2.4rem; --fs-section-h: 1.75rem; --fs-stat-num: 2.8rem; --fs-body: 18px; }
+  .alpha-body { grid-template-columns: 1fr; }
+  .stat-cards { grid-template-columns: 1fr; }
+  .container { padding: 0 1.2rem; }
+  .header { padding: 3rem 1.2rem 2rem; }
+  .teaser-wrap { padding: 1.5rem 1.2rem 0.5rem; }
+  .alpha-images { grid-template-columns: repeat(auto-fill, minmax(68px, 1fr)); }
+  .panel-labels { flex-direction: column; gap: 0.15rem; }
+  .panel-label { font-size: 0.82rem; line-height: 1.3; }
+  .pipeline-section { gap: 2.2rem; }
+  .pipeline-row { flex-wrap: wrap; justify-content: center; row-gap: 0.85rem; }
+  .pl-img-box, .pl-text-node { width: 82px; height: 82px; }
+  .pl-img-box-tiny { width: 38px; height: 38px; }
+  .pl-model-op { width: 138px; min-height: 76px; font-size: 1.05rem; }
+  .pl-op { font-size: 0.82rem; }
+  .pl-label { font-size: 0.82rem; max-width: 92px; }
+  .comp-grid { gap: 3px; }
+  .comp-cell-hdr { font-size: 0.72rem; padding: 0.4rem 0.1rem; }
+}
+@media (max-width: 1024px) {
+  .tab-panel { overflow-x: auto; }
+  .gallery-grid { min-width: max-content; }
+}
+</style>
+</head>
+<body>
+
+<!-- Dark mode toggle -->
+<button class="theme-toggle" id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode">☀</button>
+
+<!-- ═══════════════════════════════
+     HERO / HEADER
+════════════════════════════════ -->
+<div style="background:var(--bg-hero); border-bottom: 1px solid var(--border);">
+<header class="header">
+  <div class="uni-logos">
+    <img class="uni-logo-universities" src="assets/uni.svg" alt="Tel Aviv University and Reichman University logos" width="711" height="281" decoding="async" fetchpriority="high">
+    <img class="uni-logo-lab" src="assets/2026_logo.svg" alt="Canvas Lab logo" width="1000" height="1252" decoding="async" fetchpriority="high">
+  </div>
+  <h1 class="paper-title">Optimal Transport Flow Matching<br>by Design</h1>
+  <div class="authors">
+    <a href="https://malnick.net" target="_blank" rel="noopener">Shimon Malnick</a><sup>1</sup> &ensp;&middot;&ensp;
+    <a href="https://scholar.google.com/citations?user=5TS4vucAAAAJ&amp;hl=en" target="_blank" rel="noopener">Matan Rusanovsky</a><sup>1</sup> &ensp;&middot;&ensp;
+    <a href="https://www.ohadf.com" target="_blank" rel="noopener">Ohad Fried</a><sup>2</sup> &ensp;&middot;&ensp;
+    <a href="https://avidan.sites.tau.ac.il/" target="_blank" rel="noopener">Shai Avidan</a><sup>1</sup>
+  </div>
+  <div class="affiliations">
+    <sup>1</sup>Tel Aviv University &emsp; <sup>2</sup>Reichman University
+  </div>
+  <div class="links" aria-label="Project links">
+    <a href="https://github.com/ShimonMalnick/designing_ot_flows" class="btn" target="_blank" rel="noopener" aria-label="View project code on GitHub">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+      Code
+    </a>
+    <a href="#" class="btn" aria-label="Open arXiv paper">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      arXiv
+    </a>
+  </div>
+</header>
+</div>
+
+<!-- ═══════════════════════════════
+     TEASER CANVAS
+════════════════════════════════ -->
+<div style="background:var(--bg-hero);">
+<div class="teaser-wrap">
+  <canvas id="teaser-canvas" width="900" height="330" role="img" aria-label="Comparison of standard flow matching crossing trajectories and OT by Design straight paths">
+    Standard flow matching creates crossing trajectories, while OT by Design constructs straight paths through a low-frequency prior.
+  </canvas>
+  <div class="panel-labels">
+    <div class="panel-label">(a) Standard Flow Matching &mdash; Crossing Trajectories</div>
+    <div class="panel-label panel-b">(b) OT by Design (Ours) &mdash; Straight Paths by Construction</div>
+  </div>
+  <p class="teaser-caption">
+    <strong>(a)</strong> Random noise-data pairing induces <em>crossing trajectories.</em>
+    <strong>(b)</strong> We design a prior <span class="math"><span class="tilde"><em>p</em></span><sub>0</sub></span> whose coupling to the data is OT-optimal by construction.
+    Arrows: both the data and Gaussian noise map into the shared low-frequency prior.
+  </p>
+</div>
+</div>
+
+<div style="background:var(--bg);">
+<div class="container">
+
+<!-- ═══════════════════════════════
+     ABSTRACT
+════════════════════════════════ -->
+<div class="section">
+  <h2 class="section-title">Abstract</h2>
+  <p class="abstract-text">
+    Flow matching models learn to transport samples from a prior distribution to the data distribution.
+    When prior-data pairs are coupled via optimal transport, the learned trajectories are straight and non-crossing,
+    enabling fast, even single-step, generation.
+    However, computing the OT coupling in high dimensions is intractable,
+    and existing methods attempt to solve it at the cost of persistent bias or significant overhead.
+    Rather than solving for the OT coupling, we design a prior distribution for which OT optimality is
+    satisfied by construction.
+    Our key observation is that projecting each image onto its low-frequency representation
+    is an orthogonal projection — and the identity coupling over any orthogonal projection is provably OT-optimal.
+    A lightweight model generates these low-frequency samples at inference,
+    and the main flow model synthesizes the remaining details along substantially straighter paths,
+    without solving any OT problem.
+    Across all benchmarks, our method reduces trajectory curvature by more than 2&times; compared to existing methods,
+    yielding better generation quality in the few-step regime.
+  </p>
+</div>
+
+</div><!-- /container -->
+</div>
+
+<!-- ═══════════════════════════════
+     ANIMATED RESULTS
+════════════════════════════════ -->
+<div style="background:var(--bg-alt);" id="results">
+<div class="container">
+<div class="section section-lazy">
+  <h2 class="section-title">See for Yourself</h2>
+  <p class="section-body">
+    One function evaluation is the hardest setting: there is no room to correct a curved path.
+    With our designed prior, the one-step trajectory already lands closest to a high-quality sample.
+  </p>
+
+  <!-- Animated comparison grid: rows = samples, cols = methods, cycling NFE -->
+  <div class="comp-grid-wrap">
+    <div class="comp-grid-nfe-bar">
+      <span class="comp-grid-nfe-label">NFE&thinsp;=</span>
+      <span class="comp-nfe-badge" id="comp-nfe-badge">1</span>
+    </div>
+    <div class="comp-grid cifar" id="comp-grid">
+      <!-- Built by JS -->
+    </div>
+    <p class="comp-caption">One-step CIFAR-10 samples for two different seeds. All methods share the same noise seed within each row.</p>
+  </div>
+
+  <div class="tab-row" data-tabgroup="result-domain" role="tablist" aria-label="Result dataset">
+    <button class="tab-btn active" data-tab="results-cifar" role="tab" aria-selected="true" aria-controls="results-cifar">CIFAR-10</button>
+    <button class="tab-btn" data-tab="results-ffhq" role="tab" aria-selected="false" aria-controls="results-ffhq">FFHQ 256&times;256</button>
+  </div>
+
+  <div class="tab-panel active" id="results-cifar" role="tabpanel">
+    <p class="section-body" style="margin-bottom:1.2rem;font-size:1rem;">Click any image to compare methods side by side.</p>
+    <div class="nfe-anim-wrap">
+      <div class="nfe-header-bar">
+        <div class="nfe-badge-row" id="cifar-nfe-badges">
+          <button class="nfe-badge active" data-nfe="1" aria-pressed="true">NFE&thinsp;=&thinsp;1</button>
+          <button class="nfe-badge" data-nfe="2" aria-pressed="false">NFE&thinsp;=&thinsp;2</button>
+          <button class="nfe-badge" data-nfe="4" aria-pressed="false">NFE&thinsp;=&thinsp;4</button>
+        </div>
+      </div>
+      <div class="nfe-anim-grid" id="nfe-anim-grid"></div>
+      <p class="fig-caption" id="nfe-caption">
+        <strong>CIFAR-10, NFE&thinsp;=&thinsp;1.</strong> Ours gives the best one-step quality with 1.09 effective evaluations.
+        All methods share the same noise seed. Click any image to compare.
+      </p>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="results-ffhq" role="tabpanel" hidden>
+    <p class="section-body" style="margin-bottom:1.5rem;font-size:1rem;">Click any image to compare methods side by side.</p>
+    <div class="nfe-header-bar">
+      <div class="nfe-badge-row" id="ffhq-nfe-badges">
+        <button class="nfe-badge active" data-nfe="1" aria-pressed="true">NFE&thinsp;=&thinsp;1</button>
+        <button class="nfe-badge" data-nfe="2" aria-pressed="false">NFE&thinsp;=&thinsp;2</button>
+        <button class="nfe-badge" data-nfe="4" aria-pressed="false">NFE&thinsp;=&thinsp;4</button>
+      </div>
+    </div>
+    <div id="ffhq-panel-1">
+      <div id="grid-ffhq-1"></div>
+      <p class="fig-caption"><strong>1 NFE.</strong> AlignFlow excluded — no public FFHQ model.</p>
+    </div>
+    <div id="ffhq-panel-2" style="display:none">
+      <div id="grid-ffhq-2"></div>
+      <p class="fig-caption"><strong>2 NFE.</strong></p>
+    </div>
+    <div id="ffhq-panel-4" style="display:none">
+      <div id="grid-ffhq-4"></div>
+      <p class="fig-caption"><strong>4 NFE.</strong></p>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════
+     PIPELINE  (How Does It Work?)
+════════════════════════════════ -->
+<div style="background:var(--bg);" id="pipeline">
+<div class="container">
+<div class="section section-lazy">
+  <h2 class="section-title">How Does It Work?</h2>
+  <p class="section-body">
+    During training, the low-frequency transform <span class="math">T=<span class="cal">&#x1D4B0;</span>&#8728;<span class="cal">&#x1D49F;</span></span>
+    constructs paired samples <span class="math">(<em>x</em><sub>0</sub>,<em>x</em><sub>1</sub>)</span> for the main flow model
+    <span class="math"><em>v</em><sub>&theta;</sub>(<em>x</em><sub>t</sub>,t)</span>. A small generator <span class="math"><em>G</em><sub>&phi;</sub></span>
+    is trained separately to sample the low-frequency prior used at inference.
+  </p>
+
+  <div class="pipeline-section">
+    <!-- Training -->
+    <div class="pipeline-part">
+      <div class="pipeline-part-label"><span></span> Training</div>
+      <div class="pipeline-row" id="train-pipeline-row">
+
+        <div class="pl-step" data-plstep="train-0">
+          <div class="pl-img-box"><img src="assets/pipeline/training_imgs/high_res.png" alt="Training target sample x1" width="256" height="256" loading="lazy" decoding="async"></div>
+          <div class="pl-label"><span class="math"><em>x</em><sub>1</sub> ~ <em>p</em><sub>1</sub></span></div>
+        </div>
+
+        <div class="pl-connector" data-plstep="train-0">
+          <div class="pl-op"><span class="math"><span class="cal">&#x1D49F;</span></span></div><div class="pl-arrow">&#8594;</div>
+        </div>
+
+        <div class="pl-step pl-step-tiny" data-plstep="train-1">
+          <div class="pl-img-box-tiny"><img src="assets/pipeline/training_imgs/low_res.png" alt="Downsampled training sample" width="16" height="16" loading="lazy" decoding="async"></div>
+          <div class="pl-label" style="max-width:66px"><span class="math"><em>x</em><sub>1</sub><sup>&#8595;</sup></span></div>
+        </div>
+
+        <div class="pl-connector" data-plstep="train-1">
+          <div class="pl-op"><span class="math"><span class="cal">&#x1D4B0;</span></span></div><div class="pl-arrow">&#8594;</div>
+        </div>
+
+        <div class="pl-step" data-plstep="train-2">
+          <div class="pl-img-box"><img src="assets/pipeline/training_imgs/low2high.png" alt="Upsampled low-frequency training sample" width="256" height="256" loading="lazy" decoding="async"></div>
+          <div class="pl-label"><span class="math"><span class="cal">&#x1D4B0;</span>(<em>x</em><sub>1</sub><sup>&#8595;</sup>)</span></div>
+        </div>
+
+        <div class="pl-connector" data-plstep="train-2">
+          <div class="pl-op"><span class="math">+&alpha;&epsilon;</span></div><div class="pl-arrow">&#8594;</div>
+        </div>
+
+        <div class="pl-step" data-plstep="train-3">
+          <div class="pl-img-box"><img src="assets/pipeline/training_imgs/noisy_low2high.png" alt="Noised training prior sample x0" width="256" height="256" loading="lazy" decoding="async"></div>
+          <div class="pl-label"><span class="math"><em>x</em><sub>0</sub></span></div>
+        </div>
+
+        <div class="pl-connector pl-model-connector" data-plstep="train-3">
+          <div class="pl-op pl-model-op"><span class="math"><em>v</em><sub>&theta;</sub>(<em>x</em><sub>t</sub>,t)</span><span class="pl-model-note">train on paired samples</span></div><div class="pl-arrow">&#8594;</div>
+        </div>
+
+        <div class="pl-step" data-plstep="train-4">
+          <div class="pl-img-box"><img src="assets/pipeline/training_imgs/high_res.png" alt="Training target sample x1" width="256" height="256" loading="lazy" decoding="async"></div>
+          <div class="pl-label"><span class="math"><em>x</em><sub>1</sub></span></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Small generator -->
+    <div class="pipeline-part">
+      <div class="pipeline-part-label"><span></span> Small Prior Generator</div>
+      <div class="pipeline-row" id="prior-pipeline-row">
+
+        <div class="pl-step" data-plstep="prior-0">
+          <div class="pl-text-node"><span class="math"><em>z</em> ~ <span class="cal">&#x1D4A9;</span></span></div>
+          <div class="pl-label">Gaussian noise</div>
+        </div>
+
+        <div class="pl-connector" data-plstep="prior-0">
+          <div class="pl-op pl-prior-op"><span class="math"><em>G</em><sub>&phi;</sub></span></div><div class="pl-arrow">&#8594;</div>
+        </div>
+
+        <div class="pl-step pl-step-tiny" data-plstep="prior-1">
+          <div class="pl-img-box-tiny"><img src="assets/pipeline/training_imgs/low_res.png" alt="Generated low-frequency prior sample" width="16" height="16" loading="lazy" decoding="async"></div>
+          <div class="pl-label" style="max-width:66px"><span class="math"><em>x</em><sub>1</sub><sup>&#8595;</sup></span></div>
+          <div class="pl-subnote">learn low-frequency prior</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Inference -->
+    <div class="pipeline-part">
+      <div class="pipeline-part-label"><span style="background:var(--green)"></span> Inference</div>
+      <div class="pipeline-row" id="infer-pipeline-row">
+
+        <div class="pl-step" data-plstep="infer-0">
+          <div class="pl-text-node"><span class="math"><em>z</em> ~ <span class="cal">&#x1D4A9;</span></span></div>
+          <div class="pl-label">Gaussian noise</div>
+        </div>
+
+        <div class="pl-connector" data-plstep="infer-0">
+          <div class="pl-op pl-prior-op"><span class="math"><em>G</em><sub>&phi;</sub></span></div><div class="pl-arrow">&#8594;</div>
+        </div>
+
+        <div class="pl-step pl-step-tiny" data-plstep="infer-1">
+          <div class="pl-img-box-tiny"><img src="assets/pipeline/inference_imgs/low_res.png" alt="Low-frequency inference sample" width="16" height="16" loading="lazy" decoding="async"></div>
+          <div class="pl-label" style="max-width:66px"><span class="math"><span class="hat"><em>x</em></span><sub>1</sub><sup>&#8595;</sup></span></div>
+        </div>
+
+        <div class="pl-connector" data-plstep="infer-1">
+          <div class="pl-op"><span class="math"><span class="cal">&#x1D4B0;</span></span></div><div class="pl-arrow">&#8594;</div>
+        </div>
+
+        <div class="pl-step" data-plstep="infer-2">
+          <div class="pl-img-box"><img src="assets/pipeline/inference_imgs/low2high.png" alt="Upsampled low-frequency inference sample" width="256" height="256" loading="lazy" decoding="async"></div>
+          <div class="pl-label"><span class="math"><span class="cal">&#x1D4B0;</span>(<span class="hat"><em>x</em></span><sub>1</sub><sup>&#8595;</sup>)</span></div>
+        </div>
+
+        <div class="pl-connector" data-plstep="infer-2">
+          <div class="pl-op"><span class="math">+&alpha;&epsilon;</span></div><div class="pl-arrow">&#8594;</div>
+        </div>
+
+        <div class="pl-step" data-plstep="infer-3">
+          <div class="pl-img-box"><img src="assets/pipeline/inference_imgs/noisy_low2high.png" alt="Noised inference prior sample x0" width="256" height="256" loading="lazy" decoding="async"></div>
+          <div class="pl-label"><span class="math"><em>x</em><sub>0</sub></span></div>
+        </div>
+
+        <div class="pl-connector pl-model-connector" data-plstep="infer-3">
+          <div class="pl-op pl-model-op"><span class="math"><em>v</em><sub>&theta;</sub>(<em>x</em><sub>t</sub>,t)</span><span class="pl-model-note">solve ODE</span></div>
+          <div class="pl-arrow">&#8594;</div>
+        </div>
+
+        <div class="pl-step" data-plstep="infer-4">
+          <div class="pl-img-box"><img src="assets/pipeline/inference_imgs/high_res.png" alt="Generated inference output sample x1" width="256" height="256" loading="lazy" decoding="async"></div>
+          <div class="pl-label"><span class="math"><em>x</em><sub>1</sub></span></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════
+     CURVATURE STATS
+════════════════════════════════ -->
+<div style="background:var(--bg-alt);">
+<div class="container">
+<div class="section section-lazy" id="trajectories">
+  <h2 class="section-title">How Much Straighter?</h2>
+  <p class="section-body">
+    Straighter trajectories mean fewer integration steps at inference.
+    Our method cuts curvature by more than 2&times; on every benchmark — with no OT solver and no precomputation.
+  </p>
+  <div class="stat-cards">
+    <div class="stat-card">
+      <div class="stat-label">CIFAR-10</div>
+      <span class="stat-num" id="cnt-cifar">4.3&times;</span>
+      <div class="stat-detail">lower curvature than IFM<br><span style="color:var(--fg-light);font-size:0.85rem">0.087 vs. 0.370</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">FFHQ 256&times;256</div>
+      <span class="stat-num" id="cnt-ffhq">2.4&times;</span>
+      <div class="stat-detail">lower curvature than IFM<br><span style="color:var(--fg-light);font-size:0.85rem">0.083 vs. 0.201</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">ImageNet 256&times;256</div>
+      <span class="stat-num" id="cnt-imagenet">2.3&times;</span>
+      <div class="stat-detail">lower curvature than IFM<br><span style="color:var(--fg-light);font-size:0.85rem">class-conditional</span></div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════
+     WHAT IS THE PRIOR?
+════════════════════════════════ -->
+<div style="background:var(--bg);" id="prior">
+<div class="container">
+<div class="section section-lazy">
+  <h2 class="section-title">What Does the Prior Look Like?</h2>
+  <p class="section-body">
+    Our prior is not pure Gaussian noise. It starts from each image's low-frequency projection,
+    which preserves coarse layout while removing fine detail. Adding moderate Gaussian noise
+    spreads these starting points through the ambient space, but the identity pairing remains
+    OT-optimal around <span class="math">&alpha;=0.5</span>. The slider shows the tradeoff
+    between visible low-frequency structure and increasing noise.
+  </p>
+
+  <div class="tab-row" data-tabgroup="alpha-domain" role="tablist" aria-label="Prior visualization domain">
+    <button class="tab-btn active" data-tab="alpha-pixel" role="tab" aria-selected="true" aria-controls="alpha-pixel">Pixel Space (CIFAR-10)</button>
+    <button class="tab-btn" data-tab="alpha-latent" role="tab" aria-selected="false" aria-controls="alpha-latent">Latent Space (FFHQ)</button>
+  </div>
+
+  <div class="tab-panel active" id="alpha-pixel" role="tabpanel">
+    <div class="alpha-widget">
+      <div class="alpha-controls">
+        <label for="slider-pixel">&alpha;</label>
+        <input type="range" id="slider-pixel" min="0" max="10" step="1" value="5" aria-label="Pixel-space alpha noise level">
+        <span class="alpha-val" id="val-pixel">0.5</span>
+        <button class="play-btn" id="play-pixel" title="Auto-play" aria-label="Auto-play pixel-space alpha slider" aria-pressed="false">&#9654;</button>
+      </div>
+      <div class="alpha-body">
+        <div>
+          <div class="alpha-ref-row">
+            <div class="alpha-ref-label">Low-frequency projection <em>T</em>(<em>x</em>&#8321;) <span>&alpha; = 0</span></div>
+            <div class="alpha-images" id="ref-imgs-pixel"></div>
+          </div>
+          <div style="font:500 0.88rem/1 var(--sans);color:var(--fg-light);margin-bottom:0.4rem">
+            Noised prior at &alpha; = <span id="val-pixel-inline" style="font-family:var(--mono);color:var(--accent);font-weight:600">0.5</span>
+          </div>
+          <div class="alpha-images" id="imgs-pixel"></div>
+        </div>
+        <div class="ot-stats">
+          <div class="ot-stat-block">
+            <div class="domain">OT Preserved</div>
+            <div class="pct" id="pct-pixel">99.9%</div>
+            <div class="detail">of 10k pairs retain identity coupling</div>
+          </div>
+          <div class="ot-stat-block">
+            <div class="domain">Mean <em>&ell;</em>&#8322; Distance</div>
+            <div class="pct" id="dist-pixel" style="font-size:1.5rem">&#8212;</div>
+            <div class="detail">normalized, d = 3,072</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="alpha-latent" role="tabpanel" hidden>
+    <div class="alpha-widget">
+      <div class="alpha-controls">
+        <label for="slider-latent">&alpha;</label>
+        <input type="range" id="slider-latent" min="0" max="10" step="1" value="5" aria-label="Latent-space alpha noise level">
+        <span class="alpha-val" id="val-latent">0.5</span>
+        <button class="play-btn" id="play-latent" title="Auto-play" aria-label="Auto-play latent-space alpha slider" aria-pressed="false">&#9654;</button>
+      </div>
+      <div class="alpha-body">
+        <div>
+          <div class="alpha-ref-row">
+            <div class="alpha-ref-label">Original images <em>x</em>&#8321;</div>
+            <div class="alpha-images" id="orig-imgs-latent"></div>
+          </div>
+          <div class="alpha-ref-row">
+            <div class="alpha-ref-label">Low-frequency projection <em>T</em>(<em>x</em>&#8321;) <span>&alpha; = 0</span></div>
+            <div class="alpha-images" id="ref-imgs-latent"></div>
+          </div>
+          <div style="font:500 0.88rem/1 var(--sans);color:var(--fg-light);margin-bottom:0.4rem">
+            Noised prior at &alpha; = <span id="val-latent-inline" style="font-family:var(--mono);color:var(--accent);font-weight:600">0.5</span>
+          </div>
+          <div class="alpha-images" id="imgs-latent"></div>
+        </div>
+        <div class="ot-stats">
+          <div class="ot-stat-block">
+            <div class="domain">OT Preserved</div>
+            <div class="pct" id="pct-latent">100%</div>
+            <div class="detail">of 10k pairs retain identity coupling</div>
+          </div>
+          <div class="ot-stat-block">
+            <div class="domain">Mean <em>&ell;</em>&#8322; Distance</div>
+            <div class="pct" id="dist-latent" style="font-size:1.5rem">&#8212;</div>
+            <div class="detail">latent space (32&times;32&times;4)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════
+     BIBTEX
+════════════════════════════════ -->
+<div style="background:var(--bg-alt);">
+<div class="container">
+<div class="section section-lazy" id="bibtex">
+  <h2 class="section-title">BibTeX</h2>
+  <div class="bibtex-wrap">
+    <div class="bibtex-block" id="bibtex-text">Citation will be available upon arXiv publication.</div>
+    <button class="bibtex-copy" id="bibtex-copy" onclick="copyBibtex()" aria-label="Copy BibTeX citation">Copy</button>
+  </div>
+</div>
+</div>
+</div>
+
+<div class="footer">
+  Optimal Transport Flow Matching by Design &mdash; 2026
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lightbox" class="lightbox-overlay" role="dialog" aria-modal="true" aria-label="Image preview" aria-hidden="true">
+  <div class="lightbox-backdrop" aria-hidden="true"></div>
+  <div class="lightbox-content">
+    <div id="lb-row" class="lb-row"></div>
+    <button class="lightbox-close" aria-label="Close">&times;</button>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════
+   DARK MODE TOGGLE
+════════════════════════════════════════ */
+(function(){
+  const btn = document.getElementById('theme-toggle');
+  const html = document.documentElement;
+  // Detect system preference
+  const sysDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  let isDark = sysDark;
+  function applyTheme(dark) {
+    isDark = dark;
+    html.setAttribute('data-theme', dark ? 'dark' : 'light');
+    btn.textContent = dark ? '☀' : '☾';
+  }
+  applyTheme(sysDark);
+  btn.addEventListener('click', () => applyTheme(!isDark));
+})();
+
+/* ════════════════════════════════════════
+   CANVAS TEASER — Two-panel Gaussian animation
+   Arrows accumulate; (a) left→right to data, (b) both sides into the prior
+════════════════════════════════════════ */
+(function(){
+  const canvas = document.getElementById('teaser-canvas');
+  if (!canvas) return;
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let teaserVisible = true;
+  let teaserFrame = null;
+  const dpr = window.devicePixelRatio || 1;
+  const W_CSS = 900, H_CSS = 330;
+  canvas.width  = W_CSS * dpr;
+  canvas.height = H_CSS * dpr;
+  canvas.style.width = '100%';
+  canvas.style.maxWidth = W_CSS + 'px';
+  canvas.style.height = 'auto';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  // Colors (from TikZ fig_gaussians.tex)
+  const SRC_C  = '#3759C8'; // srccolor
+  const TGT_C  = '#C83737'; // tgtcolor
+  const PROJ_C = '#1E8C3C'; // projcolor
+  const GRAY_C = '#8C8C8C'; // arrowgray
+
+  // Math functions (exact from TikZ)
+  function gauss(x, m, s, a) { return a * Math.exp(-(x-m)*(x-m)/(2*s*s)); }
+  function hfmog(x) {
+    return gauss(x,-2.4,0.17,0.55)+gauss(x,-1.8,0.16,0.85)+gauss(x,-1.3,0.18,1.10)
+          +gauss(x,-0.7,0.15,0.80)+gauss(x,-0.2,0.17,0.90)+gauss(x, 0.4,0.16,1.20)
+          +gauss(x, 0.9,0.18,1.30)+gauss(x, 1.4,0.15,1.00)+gauss(x, 2.0,0.17,0.75)
+          +gauss(x, 2.5,0.16,0.55);
+  }
+  function lfenv(x) { return gauss(x,-1.3,0.85,1.10)+gauss(x,0.5,0.90,1.20)+gauss(x,2.0,0.80,0.80); }
+  function gSrc(x, amp) { return gauss(x, 0, 0.75, amp); }
+
+  // Coordinate mapping
+  const TY0=-2.8, TYR=5.6;
+  const YTOP=24, YBOT=292;
+  const RTX=8.5, PX=1.8;
+
+  // Panel A: TikZ x [0,9.8] -> canvas x [12, 432]
+  const AX0=12, AX1=432, AXS=(AX1-AX0)/9.8;
+  // Panel B: TikZ x [0,9.8] -> canvas x [468, 888]
+  const BX0=468, BX1=888, BXS=(BX1-BX0)/9.8;
+
+  function cy(ty) { return YTOP+(ty-TY0)/TYR*(YBOT-YTOP); }
+  function cxA(tx) { return AX0+tx*AXS; }
+  function cxB(tx) { return BX0+tx*BXS; }
+
+  // Sample pairs from TikZ
+  // Panel A: crossing pairs (ys=src pos, yt=tgt pos)
+  // Arrow direction: LEFT→RIGHT (from src gaussian dot → tgt hfmog dot, head at red)
+  const pairsA = [[-1.5,0.4],[-0.6,1.4],[0.0,-1.3],[0.5,2.0],[1.1,-1.8],[1.7,-0.2]];
+
+  // Panel B: tgt→proj arrows (right to middle), horizontal (yt==yp)
+  // Arrow direction: from (RTX+hfmog(yt), yt) → (PX+lfenv(yp), yp), head at green
+  const pairsTP = [[-1.8,-1.8],[-0.7,-0.7],[-0.2,-0.2],[0.9,0.9],[1.4,1.4],[2.0,2.0]];
+
+  // Panel B: src→proj arrows (left to middle), reordered so pairsSP[i].yp == pairsTP[i].yp
+  // Arrow direction: from (gSrc(ys,1.2), ys) → (PX+lfenv(yp), yp), head at green
+  const pairsSP = [[0.0,-1.8],[1.1,-0.7],[1.7,-0.2],[-1.5,0.9],[-0.6,1.4],[0.5,2.0]];
+
+  // Precompute distribution curves
+  function distPoints(fn, baseX, mapX, N) {
+    const pts=[];
+    for(let i=0;i<=N;i++){
+      const ty=TY0+i/N*TYR;
+      pts.push([mapX(baseX+fn(ty)), cy(ty)]);
+    }
+    return pts;
+  }
+  const distSrcA  = distPoints(ty=>gSrc(ty,2.0), 0, cxA, 120);
+  const distTgtA  = distPoints(ty=>hfmog(ty), RTX, cxA, 200);
+  const distSrcB  = distPoints(ty=>gSrc(ty,1.2), 0, cxB, 120);
+  const distProjB = distPoints(ty=>lfenv(ty), PX, cxB, 120);
+  const distTgtB  = distPoints(ty=>hfmog(ty), RTX, cxB, 200);
+
+  // Drawing helpers
+  function fillStrokeDist(pts, baseX, fill, stroke) {
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    for(let i=1;i<pts.length;i++) ctx.lineTo(pts[i][0], pts[i][1]);
+    ctx.lineTo(baseX, pts[pts.length-1][1]);
+    ctx.lineTo(baseX, pts[0][1]);
+    ctx.closePath();
+    ctx.fillStyle=fill; ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    for(let i=1;i<pts.length;i++) ctx.lineTo(pts[i][0], pts[i][1]);
+    ctx.strokeStyle=stroke; ctx.lineWidth=1.5; ctx.stroke();
+  }
+
+  function arrowHead(x, y, angle, sz, color) {
+    ctx.beginPath();
+    ctx.moveTo(x,y);
+    ctx.lineTo(x-sz*Math.cos(angle-0.38), y-sz*Math.sin(angle-0.38));
+    ctx.lineTo(x-sz*Math.cos(angle+0.38), y-sz*Math.sin(angle+0.38));
+    ctx.closePath(); ctx.fillStyle=color; ctx.fill();
+  }
+
+  function drawPartialArrow(x1,y1,x2,y2,progress,color,lw,headSz) {
+    if(progress<=0) return;
+    const ex=x1+(x2-x1)*progress, ey=y1+(y2-y1)*progress;
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(ex,ey);
+    ctx.strokeStyle=color; ctx.lineWidth=lw; ctx.stroke();
+    if(progress>0.8) {
+      const p=(progress-0.8)/0.2;
+      arrowHead(x2, y2, Math.atan2(y2-y1,x2-x1), headSz*p, color);
+    }
+  }
+
+  function dot(x,y,r,color) { ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fillStyle=color; ctx.fill(); }
+
+  // Animation: arrows ACCUMULATE — appear one by one, stay, then all fade then restart
+  // Timing (seconds):
+  // 0.0–0.5:  fade in distributions
+  // 0.5–3.2:  Panel A: 6 arrows left-to-right (head at red), each 0.45s apart
+  // 3.2–8.6:  Panel B: 6 pairs interleaved — right→middle and left→middle (both into prior), 0.9s per pair
+  // 8.6–10.5: hold all arrows
+  // restart
+
+  const CYCLE = 11000; // ms — hard reset after hold
+  const ARROW_DUR = 0.38;
+  function easeOut(t) { return 1-(1-t)*(1-t); }
+  function arrowProg(t, start) {
+    const dt=t-start;
+    if(dt<=0) return 0;
+    // Clamp input to [0,1] before easeOut so arrows stay at 1.0 once drawn
+    return easeOut(Math.min(dt/ARROW_DUR, 1));
+  }
+
+  const STAGGER = 0.45;
+  const PAIR_STAGGER = STAGGER * 2; // 0.9s between pairs in Panel B
+  const A_START = 0.5;
+  const B1_START = 3.2;
+
+  function drawDistributions(alpha) {
+    const a = alpha;
+    ctx.globalAlpha = a;
+
+    // Panel A
+    fillStrokeDist(distSrcA, cxA(0), `rgba(55,89,200,${0.16*a})`, `rgba(55,89,200,${0.92*a})`);
+    ctx.beginPath(); ctx.moveTo(cxA(0),cy(TY0)); ctx.lineTo(cxA(0),cy(-TY0));
+    ctx.strokeStyle=`rgba(55,89,200,${0.5*a})`; ctx.lineWidth=0.8; ctx.stroke();
+
+    fillStrokeDist(distTgtA, cxA(RTX), `rgba(200,55,55,${0.16*a})`, `rgba(200,55,55,${0.92*a})`);
+    ctx.beginPath(); ctx.moveTo(cxA(RTX),cy(TY0)); ctx.lineTo(cxA(RTX),cy(-TY0));
+    ctx.strokeStyle=`rgba(200,55,55,${0.5*a})`; ctx.lineWidth=0.8; ctx.stroke();
+
+    // Panel B
+    fillStrokeDist(distSrcB, cxB(0), `rgba(55,89,200,${0.16*a})`, `rgba(55,89,200,${0.92*a})`);
+    ctx.beginPath(); ctx.moveTo(cxB(0),cy(TY0)); ctx.lineTo(cxB(0),cy(-TY0));
+    ctx.strokeStyle=`rgba(55,89,200,${0.5*a})`; ctx.lineWidth=0.8; ctx.stroke();
+
+    fillStrokeDist(distProjB, cxB(PX), `rgba(30,140,60,${0.16*a})`, `rgba(30,140,60,${0.92*a})`);
+    ctx.beginPath(); ctx.moveTo(cxB(PX),cy(TY0)); ctx.lineTo(cxB(PX),cy(-TY0));
+    ctx.strokeStyle=`rgba(30,140,60,${0.5*a})`; ctx.lineWidth=0.8; ctx.stroke();
+
+    fillStrokeDist(distTgtB, cxB(RTX), `rgba(200,55,55,${0.16*a})`, `rgba(200,55,55,${0.92*a})`);
+    ctx.beginPath(); ctx.moveTo(cxB(RTX),cy(TY0)); ctx.lineTo(cxB(RTX),cy(-TY0));
+    ctx.strokeStyle=`rgba(200,55,55,${0.5*a})`; ctx.lineWidth=0.8; ctx.stroke();
+
+    // Divider
+    ctx.beginPath(); ctx.moveTo(450,8); ctx.lineTo(450,YBOT+6);
+    ctx.strokeStyle=`rgba(128,128,128,${0.18*a})`; ctx.lineWidth=1;
+    ctx.setLineDash([4,4]); ctx.stroke(); ctx.setLineDash([]);
+
+    ctx.globalAlpha=1;
+  }
+
+  function drawFrame(ts) {
+    teaserFrame = null;
+    if (!teaserVisible) return;
+    const t=(ts % CYCLE)/1000;
+    ctx.clearRect(0,0,W_CSS,H_CSS);
+
+    // Fade in over 0.4s; arrows accumulate and stay; hard reset at CYCLE end
+    const alpha = Math.min(t/0.4, 1);
+
+    drawDistributions(alpha);
+    ctx.globalAlpha = alpha;
+
+    // ── Panel A: 6 arrows, left-to-right (SRC → TGT), head at red
+    for(let i=0;i<pairsA.length;i++){
+      const [ys,yt]=pairsA[i];
+      const xS=cxA(gSrc(ys,2.0)), yS=cy(ys);  // left: src dot (start)
+      const xT=cxA(RTX+hfmog(yt)), yT=cy(yt); // right: tgt dot (end, red)
+      const prog=arrowProg(t, A_START+i*STAGGER);
+      dot(xT,yT,4.2,TGT_C);
+      dot(xS,yS,4.2,SRC_C);
+      if(prog>0) {
+        ctx.globalAlpha=alpha*Math.min(prog*3,1);
+        drawPartialArrow(xS,yS,xT,yT,prog,GRAY_C,1.4,8);
+        ctx.globalAlpha=alpha;
+      }
+    }
+
+    // ── Panel B: 6 pairs interleaved (right→middle and left→middle; both point into the prior)
+    for(let i=0;i<pairsTP.length;i++){
+      const [yt,yp]=pairsTP[i];
+      const x1=cxB(RTX+hfmog(yt)), y1=cy(yt); // right: tgt dot (start, red)
+      const x2=cxB(PX+lfenv(yp)), y2=cy(yp);  // middle: proj dot (end, green)
+      const prog=arrowProg(t, B1_START+i*PAIR_STAGGER);
+      dot(x1,y1,4.2,TGT_C);
+      dot(x2,y2,4.2,PROJ_C);
+      if(prog>0) {
+        ctx.globalAlpha=alpha*Math.min(prog*3,1);
+        drawPartialArrow(x1,y1,x2,y2,prog,PROJ_C,1.8,9);
+        ctx.globalAlpha=alpha;
+      }
+    }
+
+    for(let i=0;i<pairsSP.length;i++){
+      const [ys,yp]=pairsSP[i];
+      const xS=cxB(gSrc(ys,1.2)), yS=cy(ys);  // left: src dot (start, blue)
+      const xP=cxB(PX+lfenv(yp)), yP=cy(yp);  // middle: proj dot (end, green)
+      const prog=arrowProg(t, B1_START+i*PAIR_STAGGER+STAGGER);
+      dot(xP,yP,4.2,PROJ_C);
+      dot(xS,yS,4.2,SRC_C);
+      if(prog>0) {
+        ctx.globalAlpha=alpha*Math.min(prog*3,1);
+        drawPartialArrow(xS,yS,xP,yP,prog,GRAY_C,1.4,8);
+        ctx.globalAlpha=alpha;
+      }
+    }
+
+    ctx.globalAlpha=1;
+    if (!reduceMotion) scheduleFrame();
+  }
+  function scheduleFrame() {
+    if (!teaserFrame) teaserFrame = requestAnimationFrame(drawFrame);
+  }
+  if ('IntersectionObserver' in window) {
+    const obs = new IntersectionObserver(entries => {
+      teaserVisible = entries[0].isIntersecting;
+      if (teaserVisible && !reduceMotion) scheduleFrame();
+    }, { threshold: 0.01 });
+    obs.observe(canvas);
+  }
+  scheduleFrame();
+})();
+
+/* ════════════════════════════════════════
+   DATA
+════════════════════════════════════════ */
+const N_CIFAR=16, N_FFHQ=12, N_ALPHA=6;
+
+const otPixel=[
+  {pct:'100%', dist:'3.51e-02',clr:'var(--green)'},{pct:'100%', dist:'4.86e-02',clr:'var(--green)'},
+  {pct:'100%', dist:'8.62e-02',clr:'var(--green)'},{pct:'100%', dist:'1.48e-01',clr:'var(--green)'},
+  {pct:'100%', dist:'2.34e-01',clr:'var(--green)'},{pct:'99.9%',dist:'3.44e-01',clr:'var(--green)'},
+  {pct:'99.7%',dist:'4.78e-01',clr:'var(--green)'},{pct:'91.5%',dist:'6.36e-01',clr:'#d97706'},
+  {pct:'43.8%',dist:'8.18e-01',clr:'var(--red)'}, {pct:'3.1%', dist:'1.02e+00',clr:'var(--red)'},
+  {pct:'0.0%', dist:'1.25e+00',clr:'var(--red)'},
+];
+const otLatent=[
+  {pct:'100%', dist:'3.51e-01',clr:'var(--green)'},{pct:'100%', dist:'3.67e-01',clr:'var(--green)'},
+  {pct:'100%', dist:'4.09e-01',clr:'var(--green)'},{pct:'100%', dist:'4.78e-01',clr:'var(--green)'},
+  {pct:'100%', dist:'5.74e-01',clr:'var(--green)'},{pct:'100%', dist:'6.96e-01',clr:'var(--green)'},
+  {pct:'100%', dist:'8.44e-01',clr:'var(--green)'},{pct:'96.8%',dist:'1.02e+00',clr:'var(--green)'},
+  {pct:'54.5%',dist:'1.22e+00',clr:'var(--red)'}, {pct:'5.0%', dist:'1.45e+00',clr:'var(--red)'},
+  {pct:'0.0%', dist:'1.70e+00',clr:'var(--red)'},
+];
+
+function runNearViewport(selector, init) {
+  const el = document.querySelector(selector);
+  if (!el) return;
+  if (!('IntersectionObserver' in window)) {
+    init();
+    return;
+  }
+  const obs = new IntersectionObserver(entries => {
+    if (!entries[0].isIntersecting) return;
+    obs.disconnect();
+    init();
+  }, { rootMargin: '600px 0px' });
+  obs.observe(el);
+}
+
+/* ════════════════════════════════════════
+   TABS
+════════════════════════════════════════ */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const row=btn.parentElement;
+    row.querySelectorAll('.tab-btn').forEach(b=>{
+      b.classList.remove('active');
+      b.setAttribute('aria-selected', 'false');
+    });
+    btn.classList.add('active');
+    btn.setAttribute('aria-selected', 'true');
+    const tid=btn.dataset.tab;
+    let p=row.nextElementSibling;
+    while(p&&p.classList.contains('tab-panel')){
+      const active = p.id===tid;
+      p.classList.toggle('active', active);
+      p.toggleAttribute('hidden', !active);
+      p=p.nextElementSibling;
+    }
+  });
+});
+
+/* ════════════════════════════════════════
+   LIGHTBOX
+════════════════════════════════════════ */
+const lbEl=document.getElementById('lightbox');
+const lbRow=document.getElementById('lb-row');
+function lbClose(){ lbEl.classList.remove('open'); lbEl.setAttribute('aria-hidden','true'); }
+lbEl.querySelector('.lightbox-backdrop').addEventListener('click',lbClose);
+lbEl.querySelector('.lightbox-close').addEventListener('click',lbClose);
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') lbClose(); });
+
+const gridRegistry={};
+function registerGrid(id,methods,pathFn,pixelated){ gridRegistry[id]={methods,pathFn,pixelated:!!pixelated}; }
+function lbOpenRow(gridId,seed,clickedMethod){
+  const g=gridRegistry[gridId]; if(!g) return;
+  let h='';
+  for(const m of g.methods){
+    const src=g.pathFn(m.k,seed);
+    const active=m.k===clickedMethod?' lb-active':'';
+    const px=g.pixelated?'image-rendering:pixelated;':'';
+    h+=`<div class="lb-item${active}"><img src="${src}" alt="${m.l} sample ${seed}" style="${px}" decoding="async"><span class="lb-label">${m.l}</span></div>`;
+  }
+  lbRow.innerHTML=h; lbEl.classList.add('open'); lbEl.setAttribute('aria-hidden','false');
+}
+function lbOpenSingle(src){ lbRow.innerHTML=`<div class="lb-item lb-active"><img src="${src}" alt="Expanded sample image" decoding="async"></div>`; lbEl.classList.add('open'); lbEl.setAttribute('aria-hidden','false'); }
+
+/* ════════════════════════════════════════
+   IMAGE CELL
+════════════════════════════════════════ */
+function imgCell(src,fb,gridId,mk,seed){
+  const click=gridId?`onclick="lbOpenRow('${gridId}',${seed},'${mk}')"`:'';
+  const cur=gridId?'cursor:zoom-in;':'';
+  return `<div class="cell shimmer" style="aspect-ratio:1;${cur}" ${click}>
+    <img src="${src}" alt="${fb}" width="256" height="256" loading="lazy" decoding="async"
+     onload="this.parentElement.classList.remove('shimmer')"
+     onerror="this.parentElement.className='cell placeholder';this.outerHTML='<span>${fb}</span>'">
+  </div>`;
+}
+
+/* ════════════════════════════════════════
+   ALPHA WIDGET
+════════════════════════════════════════ */
+function initAlpha(domain,sId,vId,iId,pId,dId,rId,inId,data){
+  const sl=document.getElementById(sId),vl=document.getElementById(vId);
+  const im=document.getElementById(iId),pc=document.getElementById(pId);
+  const ds=document.getElementById(dId),rf=document.getElementById(rId);
+  const il=document.getElementById(inId);
+  let rh='';
+  for(let s=0;s<N_ALPHA;s++){
+    const src=`assets/alpha/${domain}/alpha_0.0_s${s}.png`;
+    rh+=`<div class="img-cell shimmer" onclick="lbOpenSingle('${src}')">
+      <img src="${src}" alt="${domain} reference sample ${s}" width="256" height="256" loading="lazy" decoding="async" onload="this.parentElement.classList.remove('shimmer')"
+       onerror="this.outerHTML='<div style=display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:0.55rem;color:#999;padding:4px>&alpha;=0 #${s}</div>'">
+      <span class="seed-label">#${s}</span></div>`;
+  }
+  rf.innerHTML=rh;
+  function upd(){
+    const i=+sl.value, a=(i/10).toFixed(1);
+    vl.textContent=a; if(il) il.textContent=a;
+    let h='';
+    for(let s=0;s<N_ALPHA;s++){
+      const src=`assets/alpha/${domain}/alpha_${a}_s${s}.png`;
+      h+=`<div class="img-cell shimmer" onclick="lbOpenSingle('${src}')">
+        <img src="${src}" alt="${domain} noised prior sample ${s} at alpha ${a}" width="256" height="256" loading="lazy" decoding="async" onload="this.parentElement.classList.remove('shimmer')"
+         onerror="this.outerHTML='<div style=display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:0.55rem;color:#999;padding:4px>&alpha;=${a} #${s}</div>'">
+        <span class="seed-label">#${s}</span></div>`;
+    }
+    im.innerHTML=h;
+    const d=data[i]; pc.textContent=d.pct; pc.style.color=d.clr;
+    ds.textContent=d.dist; ds.style.color='var(--accent)';
+  }
+  sl.addEventListener('input',upd); upd();
+}
+runNearViewport('#prior', () => {
+  initAlpha('pixel','slider-pixel','val-pixel','imgs-pixel','pct-pixel','dist-pixel','ref-imgs-pixel','val-pixel-inline',otPixel);
+  initAlpha('latent','slider-latent','val-latent','imgs-latent','pct-latent','dist-latent','ref-imgs-latent','val-latent-inline',otLatent);
+
+  const el=document.getElementById('orig-imgs-latent'); if(!el) return;
+  let h='';
+  for(let s=0;s<N_ALPHA;s++){
+    const src=`assets/alpha/latent/s${s}.png`;
+    h+=`<div class="img-cell shimmer" onclick="lbOpenSingle('${src}')">
+      <img src="${src}" alt="Original latent sample ${s}" width="256" height="256" loading="lazy" decoding="async" onload="this.parentElement.classList.remove('shimmer')"
+       onerror="this.outerHTML='<div style=display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:0.55rem;color:#999;padding:4px>orig #${s}</div>'">
+      <span class="seed-label">#${s}</span></div>`;
+  }
+  el.innerHTML=h;
+});
+
+/* ════════════════════════════════════════
+   GALLERIES
+════════════════════════════════════════ */
+function initCifarNfeGrid(){
+  const NFE_LIST = [1, 2, 4];
+  const NFE_CAPTIONS = {
+    1: '<strong>CIFAR-10, NFE\u200A=\u200A1.</strong> Ours gives the best one-step quality with 1.09 effective evaluations (including one G\u03C6 step). All methods share the same noise seed.',
+    2: '<strong>CIFAR-10, NFE\u200A=\u200A2.</strong> Ours: 1.72 effective evaluations.',
+    4: '<strong>CIFAR-10, NFE\u200A=\u200A4.</strong> Ours: 3.72 effective evaluations.',
+  };
+  const METHODS = [{k:'ifm',l:'IFM'},{k:'otfm',l:'OT-FM'},{k:'alignflow',l:'AlignFlow'},{k:'ours',l:'Ours'}];
+  const N_SEEDS = 12;
+  const IMG_PX  = 64; // display size in px
+
+  let curNFEIdx = 0; // start at NFE=1
+
+  // Build grid
+  function buildGrid() {
+    const container = document.getElementById('nfe-anim-grid');
+    if (!container) return;
+    const nfe = NFE_LIST[curNFEIdx];
+    let h = `<div class="nfe-grid-inner" style="grid-template-columns:44px repeat(${N_SEEDS},${IMG_PX}px)">`;
+    // header
+    h += '<div class="nfe-cell nfe-hdr" style="writing-mode:horizontal-tb"></div>';
+    for(let s=0;s<N_SEEDS;s++) h += `<div class="nfe-cell nfe-hdr" style="height:22px">#${s}</div>`;
+    // rows
+    for(const m of METHODS) {
+      const isOurs = m.k==='ours';
+      h += `<div class="nfe-cell nfe-lbl${isOurs?' nfe-ours':''}" style="min-height:${IMG_PX}px">${m.l}</div>`;
+      for(let s=0;s<N_SEEDS;s++) {
+        const src = `assets/cifar/${m.k}_nfe${nfe}_s${s}.png`;
+        const gid = `nfe-anim-cifar`;
+        h += `<div class="nfe-cell" style="width:${IMG_PX}px;height:${IMG_PX}px;cursor:zoom-in" onclick="lbOpenRow('cifar-nfe${nfe}',${s},'${m.k}')">
+          <img data-method="${m.k}" data-seed="${s}" src="${src}" alt="${m.l} CIFAR-10 sample ${s} at NFE ${nfe}" width="32" height="32" loading="lazy" decoding="async" class="nfe-img shimmer"
+           onload="this.classList.remove('shimmer');this.parentElement.classList.remove('shimmer')"
+           onerror="this.parentElement.innerHTML='<span style=font-size:0.5rem;color:var(--fg-light);padding:4px>${m.k} #${s}</span>'">
+        </div>`;
+      }
+    }
+    h += '</div>';
+    container.innerHTML = h;
+  }
+
+  function setNFE(idx) {
+    curNFEIdx = idx;
+    const nfe = NFE_LIST[idx];
+    document.querySelectorAll('#cifar-nfe-badges .nfe-badge').forEach((b,i) => {
+      const active = i===idx;
+      b.classList.toggle('active', active);
+      b.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+    const cap = document.getElementById('nfe-caption');
+    if (cap) cap.innerHTML = NFE_CAPTIONS[nfe] + ' Click any image to compare.';
+    document.querySelectorAll('#nfe-anim-grid .nfe-img').forEach(img => {
+      img.style.opacity = '0';
+      setTimeout(() => {
+        img.src = `assets/cifar/${img.dataset.method}_nfe${nfe}_s${img.dataset.seed}.png`;
+        img.style.opacity = '1';
+      }, 220);
+    });
+  }
+
+  // Wire up
+  buildGrid();
+
+  document.querySelectorAll('#cifar-nfe-badges .nfe-badge').forEach((btn, i) => {
+    btn.addEventListener('click', () => setNFE(i));
+  });
+
+  // Register grids for lightbox
+  NFE_LIST.forEach(nfe => {
+    registerGrid(`cifar-nfe${nfe}`, METHODS, (mk,s)=>`assets/cifar/${mk}_nfe${nfe}_s${s}.png`, true);
+  });
+}
+
+function cifarGrid(cid,nfe){
+  const el=document.getElementById(cid); if(!el) return;
+  const gid=`cifar-nfe${nfe}`;
+  const ms=[{k:'ifm',l:'IFM'},{k:'otfm',l:'OT-FM'},{k:'alignflow',l:'AlignFlow'},{k:'ours',l:'Ours'}];
+  registerGrid(gid,ms,(mk,s)=>`assets/cifar/${mk}_nfe${nfe}_s${s}.png`,true);
+  let h=`<div class="gallery-grid cifar" style="grid-template-columns:58px repeat(${N_CIFAR},1fr)">`;
+  h+=`<div class="cell hdr"></div>`;
+  for(let s=0;s<N_CIFAR;s++) h+=`<div class="cell hdr">#${s}</div>`;
+  for(const m of ms){
+    h+=`<div class="cell row-lbl ${m.k==='ours'?'ours':''}">${m.l}</div>`;
+    for(let s=0;s<N_CIFAR;s++) h+=imgCell(`assets/cifar/${m.k}_nfe${nfe}_s${s}.png`,`${m.k} #${s}`,gid,m.k,s);
+  }
+  h+='</div>'; el.innerHTML=h;
+}
+function ffhqGrid(cid,nfe){
+  const el=document.getElementById(cid); if(!el) return;
+  const gid=`ffhq-nfe${nfe}`;
+  const ms=[{k:'ifm',l:'IFM'},{k:'otfm',l:'OT-FM'},{k:'ours',l:'Ours'}];
+  registerGrid(gid,ms,(mk,s)=>`assets/ffhq/${mk}_nfe${nfe}_s${s}.png`,false);
+  let h=`<div class="gallery-grid" style="grid-template-columns:50px repeat(${N_FFHQ},1fr)">`;
+  h+=`<div class="cell hdr"></div>`;
+  for(let s=0;s<N_FFHQ;s++) h+=`<div class="cell hdr">#${s}</div>`;
+  for(const m of ms){
+    h+=`<div class="cell row-lbl ${m.k==='ours'?'ours':''}">${m.l}</div>`;
+    for(let s=0;s<N_FFHQ;s++) h+=imgCell(`assets/ffhq/${m.k}_nfe${nfe}_s${s}.png`,`${m.k} #${s}`,gid,m.k,s);
+  }
+  h+='</div>'; el.innerHTML=h;
+}
+runNearViewport('#results', () => {
+  initCifarNfeGrid();
+  cifarGrid('grid-cifar-1',1); cifarGrid('grid-cifar-2',2); cifarGrid('grid-cifar-4',4);
+  ffhqGrid('grid-ffhq-1',1); ffhqGrid('grid-ffhq-2',2); ffhqGrid('grid-ffhq-4',4);
+});
+
+/* ════════════════════════════════════════
+   ALPHA AUTO-PLAY
+════════════════════════════════════════ */
+function initPlay(btnId,slId){
+  const btn=document.getElementById(btnId),sl=document.getElementById(slId);
+  if(!btn||!sl) return;
+  let t=null;
+  btn.addEventListener('click',()=>{
+    if(t){clearInterval(t);t=null;btn.innerHTML='&#9654;';btn.setAttribute('aria-pressed','false');return;}
+    sl.value=0; sl.dispatchEvent(new Event('input')); btn.innerHTML='&#9646;&#9646;'; btn.setAttribute('aria-pressed','true');
+    t=setInterval(()=>{
+      let v=+sl.value+1;
+      if(v>10){clearInterval(t);t=null;btn.innerHTML='&#9654;';btn.setAttribute('aria-pressed','false');return;}
+      sl.value=v; sl.dispatchEvent(new Event('input'));
+    },300);
+  });
+}
+initPlay('play-pixel','slider-pixel');
+initPlay('play-latent','slider-latent');
+
+/* ════════════════════════════════════════
+   BIBTEX COPY
+════════════════════════════════════════ */
+function copyBibtex(){
+  navigator.clipboard.writeText(document.getElementById('bibtex-text').textContent).then(()=>{
+    const b=document.getElementById('bibtex-copy');
+    b.textContent='Copied!'; b.classList.add('copied');
+    setTimeout(()=>{b.textContent='Copy';b.classList.remove('copied');},2000);
+  });
+}
+
+/* ════════════════════════════════════════
+   STAT COUNTERS
+════════════════════════════════════════ */
+function animateCount(el,from,to,dur){
+  const start=performance.now(),range=to-from;
+  function step(now){
+    const p=Math.min((now-start)/dur,1),e=1-Math.pow(1-p,3);
+    el.textContent=(from+range*e).toFixed(1)+'×';
+    if(p<1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+const countObs=new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{
+    if(!entry.isIntersecting) return;
+    [{id:'cnt-cifar',to:4.3},{id:'cnt-ffhq',to:2.4},{id:'cnt-imagenet',to:2.3}].forEach(c=>{
+      const el=document.getElementById(c.id); if(el) animateCount(el,1.0,c.to,900);
+    });
+    countObs.disconnect();
+  });
+},{threshold:0.4});
+const statSec=document.getElementById('trajectories');
+if(statSec) countObs.observe(statSec);
+
+/* ════════════════════════════════════════
+   ANIMATED COMPARISON GRID
+════════════════════════════════════════ */
+(function(){
+  const METHODS = [{k:'ifm', l:'IFM'}, {k:'otfm', l:'OT-FM'}, {k:'alignflow', l:'AlignFlow'}, {k:'ours', l:'Ours'}];
+  const SAMPLE_SEEDS = [4, 5];
+  const NFE_LIST = [1];
+  const CYCLE_MS = 2800;
+  let curNFE = 0;
+
+  const grid = document.getElementById('comp-grid');
+  const badge = document.getElementById('comp-nfe-badge');
+  if (!grid) return;
+
+  // Build initial grid HTML
+  function buildGrid() {
+    let h = '';
+    // Header row
+    for (const m of METHODS) {
+      h += `<div class="comp-cell-hdr${m.k==='ours'?' ours-hdr':''}">${m.l}</div>`;
+    }
+    // Image rows
+    for (const seed of SAMPLE_SEEDS) {
+      for (const m of METHODS) {
+        h += `<div class="comp-cell">
+          <img id="comp-img-${m.k}-${seed}" src="assets/cifar/${m.k}_nfe${NFE_LIST[0]}_s${seed}.png" alt="${m.l} CIFAR-10 sample ${seed}" width="32" height="32" loading="lazy" decoding="async">
+        </div>`;
+      }
+    }
+    grid.innerHTML = h;
+  }
+
+  function setNFE(idx) {
+    curNFE = idx;
+    const nfe = NFE_LIST[idx];
+    if (badge) badge.textContent = nfe;
+    // Fade out, swap, fade in
+    const imgs = grid.querySelectorAll('.comp-cell img');
+    imgs.forEach(img => img.style.opacity = '0');
+    setTimeout(() => {
+      for (const seed of SAMPLE_SEEDS) {
+        for (const m of METHODS) {
+          const img = document.getElementById(`comp-img-${m.k}-${seed}`);
+          if (img) img.src = `assets/cifar/${m.k}_nfe${nfe}_s${seed}.png`;
+        }
+      }
+      imgs.forEach(img => img.style.opacity = '1');
+    }, 300);
+  }
+
+  buildGrid();
+
+  // Auto-cycle
+  if (NFE_LIST.length > 1) {
+    setInterval(() => {
+      setNFE((curNFE + 1) % NFE_LIST.length);
+    }, CYCLE_MS);
+  }
+})();
+
+/* ════════════════════════════════════════
+   FFHQ NFE BADGES
+════════════════════════════════════════ */
+(function(){
+  const badges = document.querySelectorAll('#ffhq-nfe-badges .nfe-badge');
+  const panels = {'1': 'ffhq-panel-1', '2': 'ffhq-panel-2', '4': 'ffhq-panel-4'};
+  badges.forEach(btn => {
+    btn.addEventListener('click', () => {
+      badges.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      badges.forEach(b => b.setAttribute('aria-pressed', b === btn ? 'true' : 'false'));
+      const nfe = btn.dataset.nfe;
+      Object.entries(panels).forEach(([n, pid]) => {
+        const p = document.getElementById(pid);
+        if (p) p.style.display = (n === nfe) ? '' : 'none';
+      });
+    });
+  });
+})();
+
+/* ════════════════════════════════════════
+   PIPELINE ANIMATION
+════════════════════════════════════════ */
+(function(){
+  function initPipelineRow(rowId) {
+    const row = document.getElementById(rowId);
+    if (!row) return;
+    const items = Array.from(row.querySelectorAll('.pl-step, .pl-connector'));
+    const STEP_MS = 220, HOLD_MS = 6000, RESET_MS = 500;
+
+    function playLoop() {
+      items.forEach(el => el.classList.remove('pl-visible'));
+      setTimeout(() => {
+        items.forEach((el, i) => {
+          setTimeout(() => el.classList.add('pl-visible'), i * STEP_MS);
+        });
+        setTimeout(playLoop, items.length * STEP_MS + HOLD_MS);
+      }, RESET_MS);
+    }
+
+    const obs = new IntersectionObserver(entries => {
+      if (!entries[0].isIntersecting) return;
+      obs.disconnect();
+      // Small delay before first play so elements are ready
+      setTimeout(playLoop, 150);
+    }, { threshold: 0.2 });
+    obs.observe(row);
+  }
+  initPipelineRow('train-pipeline-row');
+  initPipelineRow('prior-pipeline-row');
+  initPipelineRow('infer-pipeline-row');
+})();
+</script>
+</body>
+</html>
